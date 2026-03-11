@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3/14 - 3/17 白色騎人節 | 解鎖女神的絕對領域</title>
+    <style>
+        :root {
+            --primary-crimson: #5B0000;
+            --dark-red: #2A0000;
+            --gold: linear-gradient(180deg, #FFD700 0%, #B8860B 100%);
+            --rose-gold: linear-gradient(180deg, #F4C2C2 0%, #B76E79 100%);
+            --glass-bg: rgba(0, 0, 0, 0.45);
+            --gold-text: #FFD700;
+            --neon-red: #FF3131;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* ⚠️ 強制置中容器 700px */
+        .app-container {
+            width: 100%;
+            max-width: 700px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary-crimson) 0%, var(--dark-red) 100%);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        /* 背景裝飾：星芒與燙金紙屑 */
+        .app-container::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 1%),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,0.08) 0%, transparent 1%),
+                radial-gradient(circle at 50% 50%, rgba(255,215,0,0.03) 0%, transparent 2%);
+            pointer-events: none;
+        }
+
+        /* 語系切換器 */
+        .lang-switcher {
+            position: absolute; top: 15px; right: 15px; z-index: 100;
+            display: flex; gap: 4px; background: rgba(0, 0, 0, 0.6);
+            padding: 4px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2);
+        }
+        .lang-btn {
+            background: none; border: none; color: #888; font-size: 11px;
+            padding: 4px 10px; cursor: pointer; border-radius: 12px; transition: 0.3s;
+        }
+        .lang-btn.active { background: var(--gold); color: #000; font-weight: bold; }
+
+        /* 毛玻璃卡片共通樣式 */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            margin: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* 區塊 1：主視覺 */
+        .hero-section { text-align: center; padding: 60px 20px 20px; }
+        .hero-date { color: var(--gold-text); font-weight: bold; letter-spacing: 2px; font-size: 18px; margin-bottom: 8px; }
+        .hero-title { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.6); line-height: 1.1; margin-bottom: 10px; }
+        .hero-subtitle { color: var(--gold-text); font-size: 16px; letter-spacing: 4px; opacity: 0.9; }
+
+        /* 倒數計時器 */
+        .countdown-wrap { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
+        .timer-box { background: rgba(0,0,0,0.5); min-width: 65px; padding: 10px 5px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2); }
+        .timer-val { display: block; font-size: 24px; font-weight: bold; color: #fff; }
+        .timer-unit { font-size: 10px; color: var(--gold-text); text-transform: uppercase; }
+
+        /* 抽獎辦法列表 */
+        .method-list { list-style: none; margin-top: 20px; text-align: left; }
+        .method-item { display: flex; gap: 12px; margin-bottom: 14px; font-size: 15px; line-height: 1.5; color: #ddd; }
+        .method-item span b { color: var(--gold-text); font-size: 17px; }
+        .method-item small { font-size: 11px; opacity: 0.6; display: block; }
+
+        /* 個人狀態 UI */
+        .status-box { text-align: center; padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: bold; }
+        .status-locked { background: rgba(255,255,255,0.05); color: #888; border: 1px dashed #555; }
+        .status-unlocked { 
+            background: rgba(255, 215, 0, 0.1); color: var(--gold-text); border: 1px solid var(--gold-text);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); animation: flash 2s infinite;
+        }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* CTA 按鈕 */
+        .cta-main {
+            display: block; width: 100%; padding: 18px; border-radius: 40px; border: none;
+            background: linear-gradient(90deg, #8B0000, #FF0000, #8B0000);
+            background-size: 200% auto;
+            color: #fff; text-align: center; text-decoration: none; font-weight: 900; font-size: 20px;
+            box-shadow: 0 5px 25px rgba(255,0,0,0.5); margin-top: 20px;
+            cursor: pointer; position: relative; overflow: hidden; animation: shine-sweep 3s infinite linear;
+        }
+        @keyframes shine-sweep { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+        .cta-main::after {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: rotate(35deg); animation: light-move 4s infinite;
+        }
+        @keyframes light-move { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* 次要按鈕：甜蜜加倍排行榜 */
+        .cta-secondary {
+            display: block; margin: 0 20px 20px; padding: 15px; border-radius: 40px;
+            background: var(--glass-bg); border: 1.5px solid #B76E79;
+            color: #B76E79; text-align: center; text-decoration: none; font-weight: bold;
+            font-size: 16px; backdrop-filter: blur(10px); transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .cta-secondary:hover { background: rgba(183, 110, 121, 0.1); transform: scale(1.02); }
+        .cta-secondary::before {
+            content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(183, 110, 121, 0.2), transparent);
+            animation: secondary-shine 5s infinite;
+        }
+        @keyframes secondary-shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+
+        /* 區塊 2：個人戰況 & FOMO */
+        .stats-row { display: flex; justify-content: space-around; text-align: center; }
+        .stat-label { font-size: 12px; color: var(--gold-text); margin-bottom: 5px; opacity: 0.8; }
+        .stat-val { font-size: 28px; font-weight: 900; }
+
+        .fomo-alert {
+            background: rgba(255, 49, 49, 0.1); border: 1px solid var(--neon-red);
+            border-radius: 15px; padding: 20px; margin-top: 20px; display: none;
+            animation: neon-pulse 1.5s infinite;
+        }
+        @keyframes neon-pulse { 
+            0%, 100% { box-shadow: 0 0 5px var(--neon-red); border-color: var(--neon-red); } 
+            50% { box-shadow: 0 0 20px var(--neon-red); border-color: #fff; }
+        }
+        .fomo-text { font-size: 14px; line-height: 1.6; font-weight: bold; color: #fff; }
+        .fomo-gap { font-size: 20px; color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+
+        /* 區塊 3：榮耀徽章 */
+        .badge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .badge-sub { font-size: 13px; color: var(--gold-text); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .info-btn { background: var(--gold); color: #000; width: 18px; height: 18px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .badge-item { background: rgba(255,255,255,0.05); padding: 15px 5px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .badge-icon { font-size: 32px; margin-bottom: 8px; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
+        .badge-status { font-size: 9px; background: #555; color: #fff; padding: 2px 6px; border-radius: 10px; display: inline-block; margin-bottom: 5px; }
+        .badge-name { font-size: 11px; font-weight: bold; color: #ccc; line-height: 1.2; }
+
+        /* 排行榜 */
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .rank-table th { color: var(--gold-text); font-size: 13px; text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,215,0,0.2); }
+        .rank-table td { padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
+        .rank-num { font-weight: 900; font-style: italic; font-size: 18px; }
+        .top-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .top-2 { color: #C0C0C0; }
+        .top-3 { color: #CD7F32; }
+        .rank-val { text-align: right; font-weight: bold; color: var(--gold-text); }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: #2A0000; border: 1px solid var(--gold-text); border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #888; }
+        .modal-text { font-size: 15px; line-height: 1.8; color: #ddd; margin-top: 10px; }
+
+        /* T&C */
+        .tc-section { padding: 0 25px 50px; font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
+        .tc-title { color: rgba(255,255,255,0.7); font-weight: bold; margin-bottom: 10px; }
+
+        /* Skeleton */
+        .skeleton { background: rgba(255,255,255,0.05); height: 20px; border-radius: 4px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- 語系切換器 -->
+        <div class="lang-switcher">
+            <button class="lang-btn active" data-lang="zh-TW" onclick="setLang('zh-TW')">繁體</button>
+            <button class="lang-btn" data-lang="zh-CN" onclick="setLang('zh-CN')">简体</button>
+            <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" data-lang="ja" onclick="setLang('ja')">日文</button>
+        </div>
+
+        <!-- 區塊 1：主視覺 -->
+        <header class="hero-section">
+            <div class="hero-date">3/14 - 3/17</div>
+            <h1 class="hero-title" id="t-title">白色騎人節</h1>
+            <p class="hero-subtitle" id="t-subtitle">解鎖女神的絕對領域</p>
+            
+            <div class="countdown-wrap">
+                <div class="timer-box"><span class="timer-val" id="d-val">00</span><span class="timer-unit" id="u-d">D</span></div>
+                <div class="timer-box"><span class="timer-val" id="h-val">00</span><span class="timer-unit" id="u-h">H</span></div>
+                <div class="timer-box"><span class="timer-val" id="m-val">00</span><span class="timer-unit" id="u-m">M</span></div>
+                <div class="timer-box"><span class="timer-val" id="s-val">00</span><span class="timer-unit" id="u-s">S</span></div>
+            </div>
+        </header>
+
+        <!-- 抽獎辦法 -->
+        <div class="glass-card">
+            <h2 id="t-draw-title" style="font-size: 18px; margin-bottom: 15px; color: #fff;">送禮抽萬鑽</h2>
+            <ul class="method-list">
+                <li class="method-item">
+                    <span>1. <span id="t-m1">贈送「白色騎人節」系列禮物即可獲得抽獎資格</span><br><small id="t-m1-sub">(含直播及聊天室)</small></span>
+                </li>
+                <li class="method-item">
+                    <span>2. <span id="t-m2">隨機抽出 <b>50 名</b> 幸運兒發放 <b>10,000 鑽</b></span></span>
+                </li>
+                <li class="method-item">
+                    <span>3. <span id="t-m3">總榜 <b>Top 50</b> 獲限定尊榮稱號徽章</span></span>
+                </li>
+            </ul>
+
+            <!-- 抽獎狀態 -->
+            <div id="user-status-ui" class="status-box status-locked">
+                <span id="t-status-locked">🔒 尚未取得抽獎資格 ，快去送禮</span>
+            </div>
+
+            <a href="https://swag.live/livestream" class="cta-main" id="t-cta-gift">🎁 立即送禮</a>
+        </div>
+
+        <!-- 過場次要按鈕 -->
+        <a href="https://creators.swag.live/white14" class="cta-secondary" id="t-cta-rank">甜蜜加倍排行榜</a>
+
+        <!-- 區塊 2：個人戰況 -->
+        <div class="glass-card">
+            <div class="stats-row">
+                <div><div class="stat-label" id="t-stat-cost">累積消耗鑽石</div><div class="stat-val" id="stat-diamonds">0</div></div>
+                <div><div class="stat-label" id="t-stat-rank">目前排名</div><div class="stat-val" id="stat-rank">--</div></div>
+            </div>
+
+            <!-- FOMO 提示 -->
+            <div id="fomo-ui" class="fomo-alert">
+                <p class="fomo-text">
+                    🚨 <span id="t-fomo-1">戰況告急！您只差</span> 
+                    <span class="fomo-gap" id="fomo-gap-val">0</span> 
+                    <span id="t-fomo-2">鑽就能擊敗上一名！立刻送禮反超，奪取更高榮耀！</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- 區塊 3：榮耀徽章 -->
+        <div class="glass-card">
+            <div class="badge-header">
+                <h3 id="t-badge-title" style="font-size: 18px;">榮耀限定徽章</h3>
+                <div class="badge-sub">
+                    <span id="t-badge-stack">🏆 【徽章疊加機制】榮耀全收！</span>
+                    <div class="info-btn" onclick="toggleModal(true)">i</div>
+                </div>
+            </div>
+            <div class="badge-grid">
+                <div class="badge-item"><div class="badge-icon">👑</div><div class="badge-status" id="t-wait-1">敬請期待</div><div class="badge-name">白色騎人國王</div></div>
+                <div class="badge-item"><div class="badge-icon">🎖️</div><div class="badge-status" id="t-wait-2">敬請期待</div><div class="badge-name">白色騎人伯爵</div></div>
+                <div class="badge-item"><div class="badge-icon">🤵</div><div class="badge-status" id="t-wait-3">敬請期待</div><div class="badge-name">白色騎人紳士</div></div>
+                <div class="badge-item"><div class="badge-icon">⚔️</div><div class="badge-status" id="t-wait-4">敬請期待</div><div class="badge-name">白色騎人侍衛</div></div>
+                <div class="badge-item" style="grid-column: span 2;"><div class="badge-icon">🏅</div><div class="badge-status" id="t-wait-5">敬請期待</div><div class="badge-name">白色騎人紀念</div></div>
+            </div>
+        </div>
+
+        <!-- 區塊 4：排行榜 -->
+        <div class="glass-card">
+            <h3 id="t-rank-title" style="font-size: 18px; margin-bottom: 10px;">白色騎士送禮榜</h3>
+            <table class="rank-table">
+                <thead><tr><th id="t-col-rank">排名</th><th id="t-col-id">用戶 ID</th><th id="t-col-val" style="text-align: right;">鑽石數</th></tr></thead>
+                <tbody id="rank-list-body">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 區塊 5：T&C -->
+        <footer class="tc-section">
+            <div class="tc-title" id="t-tc-title">活動規則與注意事項</div>
+            <p id="t-tc-1">僅限送「白色騎人節」系列禮物，方符合抽獎資格，禮物包含直播間與聊天室。</p>
+            <p id="t-tc-2">送鑽排行榜僅計算「白色騎人節」禮物。</p>
+            <p id="t-tc-3">本頁資料每 5 分鐘更新一次。</p>
+            <p id="t-tc-4">抽獎鑽石將於活動結束後 5 個工作日內抽出並發放。</p>
+            <p id="t-tc-5">達標徽章將於 3 個工作天內解鎖發放。</p>
+            <p id="t-tc-6">最終結果以官方計算為準。</p>
+        </footer>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="badge-modal">
+            <div class="modal-box">
+                <span class="modal-close" onclick="toggleModal(false)">&times;</span>
+                <div id="t-modal-body" class="modal-text">
+                    您的名次將決定您擁有的徽章版圖！第 1 名可獲得全系列徽章，第 2 名可獲得第 2 至 50 名的所有徽章，享受無與倫比的成就感。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://valentine2026-api-905468082258.asia-east1.run.app/api/v1/rank";
+        
+        const langDict = {
+            'zh-TW': {
+                't-title': '白色騎人節', 't-subtitle': '解鎖女神的絕對領域',
+                't-draw-title': '送禮抽萬鑽', 't-m1': '贈送「白色騎人節」系列禮物即可獲得抽獎資格', 't-m1-sub': '(含直播及聊天室)',
+                't-m2': '隨機抽出 50 名 幸運兒發放 10,000 鑽', 't-m3': '總榜 Top 50 獲限定尊榮稱號徽章',
+                't-status-locked': '🔒 尚未取得抽獎資格 ，快去送禮', 't-status-unlocked': '🎉 恭喜！您已成功獲得萬鑽抽獎資格！',
+                't-cta-gift': '🎁 立即送禮', 't-cta-rank': '甜蜜加倍排行榜',
+                't-stat-cost': '累積消耗鑽石', 't-stat-rank': '目前排名',
+                't-fomo-1': '戰況告急！您只差', 't-fomo-2': '鑽就能擊敗上一名！立刻送禮反超，奪取更高榮耀！',
+                't-badge-title': '榮耀限定徽章', 't-badge-stack': '🏆 【徽章疊加機制】榮耀全收！',
+                't-rank-title': '白色騎士送禮榜', 't-col-rank': '排名', 't-col-id': '用戶 ID', 't-col-val': '鑽石數',
+                't-tc-title': '活動規則與注意事項', 't-modal-body': '您的名次將決定您擁有的徽章版圖！第 1 名可獲得全系列徽章，第 2 名可獲得第 2 至 50 名的所有徽章，享受無與倫比的成就感。',
+                'u-d': '天', 'u-h': '時', 'u-m': '分', 'u-s': '秒',
+                'wait': '敬請期待'
+            },
+            'zh-CN': {
+                't-title': '白色骑人节', 't-subtitle': '解锁女神的绝对领域',
+                't-draw-title': '送礼抽万钻', 't-m1': '赠送“白色骑人节”系列礼物即可获得抽奖资格', 't-m1-sub': '(含直播及聊天室)',
+                't-m2': '随机抽出 50 名 幸运儿发放 10,000 钻', 't-m3': '总榜 Top 50 获限定尊荣称号徽章',
+                't-status-locked': '🔒 尚未取得抽奖资格 ，快去送礼', 't-status-unlocked': '🎉 恭喜！您已成功获得万钻抽奖资格！',
+                't-cta-gift': '🎁 立即送礼', 't-cta-rank': '甜蜜加倍排行榜',
+                't-stat-cost': '累计消耗钻石', 't-stat-rank': '目前排名',
+                't-fomo-1': '战况告急！您只差', 't-fomo-2': '钻就能击败上一名！立刻送礼反超，夺取更高荣耀！',
+                't-badge-title': '荣耀限定徽章', 't-badge-stack': '🏆 【徽章叠加机制】荣耀全收！',
+                't-rank-title': '白色骑士送礼榜', 't-col-rank': '排名', 't-col-id': '用户 ID', 't-col-val': '钻石数',
+                't-tc-title': '活动规则与注意事项', 't-modal-body': '您的名次将决定您拥有的徽章版图！第 1 名可获得全系列徽章，第 2 名可获得第 2 至 50 名的所有徽章，享受无与伦比的成就感。',
+                'u-d': '天', 'u-h': '时', 'u-m': '分', 'u-s': '秒',
+                'wait': '敬请期待'
+            },
+            'en': {
+                't-title': 'White Rider Fest', 't-subtitle': 'Unlock the Secret Realm',
+                't-draw-title': 'Gifting Raffle', 't-m1': 'Gift "White Rider" series to enter the raffle', 't-m1-sub': '(Live & Chat)',
+                't-m2': '50 winners will get 10,000 Diamonds', 't-m3': 'Top 50 get exclusive title badges',
+                't-status-locked': '🔒 Not qualified yet, gift now!', 't-status-unlocked': '🎉 Congrats! You are qualified for the raffle!',
+                't-cta-gift': '🎁 Gift Now', 't-cta-rank': 'Sweet Double Ranking',
+                't-stat-cost': 'Diamonds Spent', 't-stat-rank': 'Current Rank',
+                't-fomo-1': 'EMERGENCY! You are only', 't-fomo-2': 'diamonds away from Rank Up! Gift now for glory!',
+                't-badge-title': 'Limited Badges', 't-badge-stack': '🏆 [Stacking Mechanism] Take all!',
+                't-rank-title': 'White Knight Leaderboard', 't-col-rank': 'Rank', 't-col-id': 'User ID', 't-col-val': 'Diamonds',
+                't-tc-title': 'Terms & Conditions', 't-modal-body': 'Your rank determines your collection! Rank 1 gets all badges, Rank 2 gets Rank 2-50. Total dominance!',
+                'u-d': 'D', 'u-h': 'H', 'u-m': 'M', 'u-s': 'S',
+                'wait': 'Coming Soon'
+            },
+            'ja': {
+                't-title': '白い騎人祭', 't-subtitle': '女神の絶対領域を解禁せよ',
+                't-draw-title': '1万ダイヤ抽選', 't-m1': '「白い騎人祭」ギフトを贈って抽選に参加', 't-m1-sub': '(配信・チャット含む)',
+                't-m2': '抽選で 50 名様に 10,000 ダイヤ', 't-m3': 'Top 50 に限定称号バッジ',
+                't-status-locked': '🔒 資格未取得、ギフトを贈りましょう', 't-status-unlocked': '🎉 おめでとう！抽選資格を獲得しました！',
+                't-cta-gift': '🎁 今すぐ贈る', 't-cta-rank': '倍増ランキング',
+                't-stat-cost': '累計消費ダイヤ', 't-stat-rank': '現在の順位',
+                't-fomo-1': '戦況危うし！あと', 't-fomo-2': 'ダイヤでランクアップ！今すぐ逆転だ！',
+                't-badge-title': '限定バッジ', 't-badge-stack': '🏆 【重複獲得】すべてを手に！',
+                't-rank-title': 'ホワイトナイトランキング', 't-col-rank': '順位', 't-col-id': 'ユーザー ID', 't-col-val': 'ダイヤ数',
+                't-tc-title': 'イベント規約', 't-modal-body': '順位によってバッジが決まります！1位は全種類、2位は2位〜50位をすべて獲得。無類の達成感を！',
+                'u-d': '日', 'u-h': '時', 'u-m': '分', 'u-s': '秒',
+                'wait': '近日公開'
+            }
+        };
+
+        function setLang(lang) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+            
+            const dict = langDict[lang];
+            Object.keys(dict).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.innerText = dict[key];
+            });
+            document.querySelectorAll('[id^="t-wait"]').forEach(el => el.innerText = dict.wait);
+            window.currentLang = lang;
+        }
+
+        function toggleModal(show) {
+            document.getElementById('badge-modal').style.display = show ? 'flex' : 'none';
+        }
+
+        async function fetchData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('user_id') || "";
+            
+            try {
+                const res = await fetch(`${API_URL}${uid ? '?user_id='+uid : ''}`);
+                const data = await res.json();
+                renderUI(data, uid);
+            } catch (e) {
+                console.error("Fetch error", e);
+            }
+        }
+
+        function renderUI(data, myUid) {
+            // Rank List
+            const body = document.getElementById('rank-list-body');
+            body.innerHTML = "";
+            data.leaderboard.forEach((user, i) => {
+                const tr = document.createElement('tr');
+                const topClass = i < 3 ? `top-${i+1}` : "";
+                tr.innerHTML = `<td class="rank-num ${topClass}">${i+1}</td><td>${user.user_id}</td><td class="rank-val">${user.diamond_cost.toLocaleString()}</td>`;
+                body.appendChild(tr);
+            });
+
+            // Personal Stats
+            if (data.user_info) {
+                const u = data.user_info;
+                document.getElementById('stat-diamonds').innerText = u.diamond_cost.toLocaleString();
+                document.getElementById('stat-rank').innerText = u.rank;
+                
+                // Status Switch
+                const statusUI = document.getElementById('user-status-ui');
+                if (u.diamond_cost >= 1) {
+                    statusUI.className = "status-box status-unlocked";
+                    statusUI.innerText = langDict[window.currentLang]['t-status-unlocked'];
+                }
+
+                // FOMO Logic (Rank 2-10)
+                const fomoUI = document.getElementById('fomo-ui');
+                if (u.rank >= 2 && u.rank <= 10) {
+                    const prevRankIdx = u.rank - 2; // rank is 1-based, array is 0-based
+                    if (data.leaderboard[prevRankIdx]) {
+                        const gap = data.leaderboard[prevRankIdx].diamond_cost - u.diamond_cost + 1;
+                        document.getElementById('fomo-gap-val').innerText = gap.toLocaleString();
+                        fomoUI.style.display = "block";
+                    }
+                }
+            }
+        }
+
+        function startTimer() {
+            const target = new Date("2026-03-17T23:59:59").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                if (diff <= 0) return;
+                
+                document.getElementById('d-val').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
+                document.getElementById('h-val').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
+                document.getElementById('m-val').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                document.getElementById('s-val').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+            }, 1000);
+        }
+
+        // Init
+        setLang('zh-TW');
+        startTimer();
+        fetchData();
+        // Refresh every 5 mins
+        setInterval(fetchData, 300000);
+    </script>
+</body>
+</html>
