@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>2026 白色騎人節 - 送禮抽萬鑽</title>
+    <style>
+        :root {
+            --primary-red: #5B0000;
+            --dark-red: #2A0000;
+            --gold: #D4AF37;
+            --gold-light: #F9E79F;
+            --glass: rgba(0, 0, 0, 0.4);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+            background-attachment: fixed;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #fff; line-height: 1.6; font-size: 16px; overflow-x: hidden;
+        }
+
+        /* 背景裝飾：閃耀星芒 */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.1) 0%, transparent 20%);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* 愛心雨容器 */
+        #heart-rain-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1; overflow: hidden;
+        }
+        .falling-heart {
+            position: absolute; color: rgba(255, 105, 180, 0.4); 
+            user-select: none; pointer-events: none;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* 核心防跑版容器 */
+        .app-container {
+            width: 100%; max-width: 700px; margin: 0 auto; position: relative;
+            min-height: 100vh; padding: calc(60px + var(--safe-top)) 15px calc(30px + var(--safe-bottom)) 15px;
+        }
+
+        /* 語系切換器 */
+        .lang-switcher {
+            position: absolute; top: calc(15px + var(--safe-top)); right: 15px;
+            display: flex; gap: 5px; z-index: 100;
+        }
+        .lang-btn {
+            background: var(--glass); border: 1px solid var(--gold); color: var(--gold);
+            padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; backdrop-filter: blur(5px);
+        }
+        .lang-btn.active { background: var(--gold); color: var(--dark-red); font-weight: bold; }
+
+        /* 卡片與通用組件 */
+        .card {
+            background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 16px;
+            padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .hero-section { text-align: center; }
+        .hero-date { color: var(--gold); font-weight: bold; font-size: 1.1rem; text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        .hero-title { font-size: 2.2rem; margin: 5px 0; font-weight: 900; }
+        .hero-sub { font-size: 1.1rem; color: #ffcccc; margin-bottom: 20px; }
+
+        .timer-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .timer-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; min-width: 60px; }
+        .timer-num { display: block; font-size: 1.5rem; font-weight: bold; color: var(--gold); }
+        .timer-unit { font-size: 12px; opacity: 0.8; }
+
+        .rules-list { text-align: left; padding: 0; list-style: none; margin: 0 0 20px 0; }
+        .rules-list li { margin-bottom: 12px; position: relative; padding-left: 25px; }
+        .rules-list li::before { content: "✦"; position: absolute; left: 0; color: var(--gold); }
+        .highlight-gold { color: var(--gold); font-weight: bold; }
+        .sub-text { font-size: 12px; opacity: 0.7; display: block; }
+
+        .status-box { padding: 15px; border-radius: 12px; font-weight: bold; text-align: center; margin-bottom: 15px; }
+        .status-locked { color: #888; background: rgba(255,255,255,0.05); }
+        .status-unlocked { 
+            color: var(--gold-light); background: rgba(212, 175, 55, 0.1); 
+            border: 1px solid var(--gold); text-shadow: 0 0 10px var(--gold); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+
+        .btn-main {
+            display: block; width: 100%; padding: 18px; background: linear-gradient(to right, #ff0000, #b30000);
+            color: #fff; text-align: center; text-decoration: none; border-radius: 50px;
+            font-weight: 900; font-size: 1.3rem; position: relative; overflow: hidden;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.4);
+        }
+        .btn-main::after {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg); animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
+
+        .btn-secondary {
+            display: block; width: 80%; margin: 0 auto; padding: 12px;
+            border: 1px solid var(--gold); background: var(--glass); color: var(--gold);
+            text-align: center; text-decoration: none; border-radius: 50px; font-size: 1rem;
+        }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--gold); }
+
+        .fomo-alert {
+            background: rgba(255, 0, 0, 0.15); border: 1px solid #ff0000; padding: 15px;
+            border-radius: 12px; margin-top: 15px; color: #ff4d4d; font-weight: bold;
+            animation: neon-blink 1s infinite alternate; display: none;
+        }
+        @keyframes neon-blink { 0% { box-shadow: 0 0 5px #ff0000; } 100% { box-shadow: 0 0 15px #ff0000; } }
+
+        /* 徽章區塊 */
+        .badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 15px; }
+        .badge-item { width: 30%; min-width: 90px; text-align: center; }
+        .badge-q {
+            width: 60px; height: 60px; margin: 0 auto 10px; background: radial-gradient(circle, #444, #111);
+            border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; color: var(--gold); position: relative;
+        }
+        .badge-name { font-size: 12px; font-weight: bold; display: block; line-height: 1.2; }
+
+        /* 排行榜表格樣式調整 */
+        .rank-table-container {
+            max-width: 340px; 
+            margin: 0 auto;
+        }
+        .rank-table { width: 100%; border-collapse: collapse; }
+        .rank-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .rank-table th { 
+            padding: 5px 10px; 
+            font-size: 13px; 
+            color: var(--gold-light); 
+            opacity: 0.9; 
+            font-weight: bold; 
+        }
+        .rank-table td { padding: 5px 10px; } 
+        .rank-num { 
+            font-weight: 900; 
+            width: 60px; 
+            text-align: left; 
+            font-size: 1.15rem; 
+        }
+        .top-1 { color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+        .top-2 { color: #C0C0C0; text-shadow: 0 0 8px rgba(192,192,192,0.4); }
+        .top-3 { color: #CD7F32; text-shadow: 0 0 8px rgba(205,127,50,0.4); }
+        .rank-cost { 
+            text-align: right; 
+            color: var(--gold); 
+            font-family: monospace; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+        }
+
+        .footer-rules { font-size: 13px; color: #aaa; }
+        .footer-rules h4 { color: #ccc; margin-bottom: 10px; }
+        .footer-rules ol { padding-left: 20px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85);
+            display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: var(--primary-red); border: 1px solid var(--gold); padding: 30px;
+            border-radius: 16px; max-width: 320px; text-align: center; position: relative;
+        }
+        .modal-close { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="heart-rain-container"></div>
+
+<div class="app-container">
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('tw', this)">繁體</button>
+        <button class="lang-btn" onclick="setLang('cn', this)">简体</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('jp', this)">日文</button>
+    </div>
+
+    <section class="hero-section">
+        <div class="hero-date" id="ui-date">3/14 - 3/17 白色騎人節</div>
+        <h1 class="hero-title" id="ui-title">送禮抽萬鑽</h1>
+        <div class="hero-sub" id="ui-subtitle">解鎖女神的絕對領域</div>
+
+        <div class="timer-container">
+            <div class="timer-box"><span class="timer-num" id="days">00</span><span class="timer-unit" id="u-d">天</span></div>
+            <div class="timer-box"><span class="timer-num" id="hours">00</span><span class="timer-unit" id="u-h">時</span></div>
+            <div class="timer-box"><span class="timer-num" id="mins">00</span><span class="timer-unit" id="u-m">分</span></div>
+            <div class="timer-box"><span class="timer-num" id="secs">00</span><span class="timer-unit" id="u-s">秒</span></div>
+        </div>
+
+        <div class="card">
+            <ul class="rules-list" id="ui-rules"></ul>
+            <div id="status-box" class="status-box status-locked">
+                <span id="ui-status-text">🔒 尚未取得抽獎資格</span>
+            </div>
+            <!-- 目標連結 1: swag.live -->
+            <a href="https://swag.live/livestream" target="_blank" class="btn-main" id="ui-cta-gift">🎁 立即送禮</a>
+        </div>
+    </section>
+
+    <div style="text-align: center; margin-bottom: 25px;">
+        <div id="ui-cta-subtext" style="font-size: 14px; opacity: 0.9; margin-bottom: 8px; color: var(--gold-light);">應援心儀女神，贏取豐厚獎勵</div>
+        <!-- 目標連結 2: creators.swag.live -->
+        <a href="https://creators.swag.live/white14" target="_blank" class="btn-secondary" id="ui-cta-rank">主播活動詳情 ></a>
+    </div>
+
+    <section class="card">
+        <div class="stat-grid">
+            <div class="stat-item">
+                <span id="ui-label-cost">累積鑽石</span>
+                <span class="stat-val" id="user-diamond">0</span>
+            </div>
+            <div class="stat-item">
+                <span id="ui-label-rank">目前排名</span>
+                <span class="stat-val" id="user-rank">-</span>
+            </div>
+        </div>
+        <div id="fomo-box" class="fomo-alert">
+            🚨 <span id="ui-fomo-text"></span>
+        </div>
+    </section>
+
+    <section class="card">
+        <div style="text-align:center; margin-bottom:15px;">
+            <span style="font-weight:bold; font-size:1.1rem;" id="ui-badge-title">榮耀限定徽章</span>
+            <span class="highlight-gold" style="cursor:pointer; margin-left:5px;" onclick="toggleModal(true)">[ i ]</span>
+            <div id="ui-badge-stack" style="display:block; font-size:12px; margin-top:5px;" class="highlight-gold">🏆 【徽章疊加機制】實力輾壓，榮耀全收！</div>
+        </div>
+        <div class="badge-container">
+            <div class="badge-item"><div class="badge-q">?</div><span class="badge-name">第 1 名：<br>白色騎人國王</span></div>
+            <div class="badge-item"><div class="badge-q">?</div><span class="badge-name">第 2 名：<br>白色騎人伯爵</span></div>
+            <div class="badge-item"><div class="badge-q">?</div><span class="badge-name">第 3 名：<br>白色騎人紳士</span></div>
+            <div class="badge-item"><div class="badge-q">?</div><span class="badge-name">第 4-10 名：<br>白色騎人侍衛</span></div>
+            <div class="badge-item"><div class="badge-q">?</div><span class="badge-name">第 11-50 名：<br>白色騎人紀念</span></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h3 style="text-align:center; color:var(--gold); margin-top:0; font-size: 1.25rem;" id="ui-leader-title">白色騎人節送禮榜</h3>
+        <div class="rank-table-container">
+            <table class="rank-table" id="leaderboard-table"></table>
+        </div>
+    </section>
+
+    <section class="footer-rules">
+        <h4 id="ui-footer-title">活動規則與注意事項</h4>
+        <ol id="ui-footer-list"></ol>
+    </section>
+</div>
+
+<div id="modal" class="modal-overlay" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="toggleModal(false)">&times;</span>
+        <p id="ui-modal-text"></p>
+    </div>
+</div>
+
+<script>
+    // --- 連結攔截機制 (Iframe / PWA 適配) ---
+    document.addEventListener('click', function(e) {
+        // 1. 確認當前是否位於 iframe 中
+        if (window.self === window.top) return;
+
+        // 2. 攔截 <a> 標籤且 target 為 _blank 的點擊
+        const link = e.target.closest('a[target="_blank"]');
+        if (!link) return;
+
+        try {
+            // 3. 使用 URL 解析網址
+            const url = new URL(link.href);
+            const hostname = url.hostname;
+
+            // 4. 精確網域過濾
+            if (hostname === 'swag.live' || hostname === 'www.swag.live') {
+                // 阻止預設行為
+                e.preventDefault();
+                // 透過 postMessage 將任務傳送給父層視窗
+                window.parent.postMessage({
+                    type: 'PWA_NAVIGATE',
+                    url: link.href
+                }, '*');
+                console.log('[PWA Link Intercepted]', link.href);
+            } else {
+                // hostname 為 creators.swag.live 或其他：不攔截，維持原樣開新分頁
+                return;
+            }
+        } catch (error) {
+            console.error('[Link Parsing Error]', error);
+        }
+    });
+
+    const LANGS = {
+        tw: {
+            date: "3/14 - 3/17 白色騎人節", title: "送禮抽萬鑽", subtitle: "解鎖女神的絕對領域",
+            uD: "天", uH: "時", uM: "分", uS: "秒",
+            rules: ["贈送<span class='highlight-gold'>「白色騎人節」</span>系列禮物即可獲得抽獎資格", "隨機抽出 <span class='highlight-gold'>50</span> 名幸運兒發放 <span class='highlight-gold'>10,000</span> 鑽", "總榜 <span class='highlight-gold'>Top 50</span> 獲限定尊榮稱號徽章"],
+            sLocked: "🔒 尚未取得抽獎資格，快去送禮", sUnlocked: "🎉 恭喜！您已成功獲得萬鑽抽獎資格！",
+            ctaGift: "🎁 立即送禮", ctaSub: "應援心儀女神，贏取豐厚獎勵", ctaRank: "主播活動詳情 >", 
+            lCost: "累積鑽石", lRank: "目前排名",
+            fomo: "戰況告急！您只差 <span class='highlight-gold'>{diff}</span> 鑽就能擊敗上一名！",
+            bTitle: "榮耀限定徽章", bStack: "🏆 【徽章疊加機制】實力輾壓，榮耀全收！",
+            leaderTitle: "白色騎人節送禮榜", hRank: "名次", hTotal: "總鑽石",
+            footerTitle: "活動規則與注意事項",
+            footerList: [
+                "僅限送「白色騎人節」系列禮物（含直播間及聊天室），方符合抽獎資格。",
+                "送鑽排行榜僅計算對應活動禮物。",
+                "資料每 5 分鐘更新一次。",
+                "徽章與獎勵將於活動結束後 5 個工作日內發放。",
+                "最終結果以官方計算為準。"
+            ],
+            modal: "您的名次將決定您擁有的徽章版圖！第 1 名可獲得全系列徽章，以此類推。"
+        },
+        cn: {
+            date: "3/14 - 3/17 白色骑人节", title: "送礼抽万钻", subtitle: "解锁女神的绝对领域",
+            uD: "天", uH: "时", uM: "分", uS: "秒",
+            rules: ["赠送<span class='highlight-gold'>「白色骑人节」</span>系列礼物即可获得抽奖资格", "随机抽出 <span class='highlight-gold'>50</span> 名幸运儿发放 <span class='highlight-gold'>10,000</span> 钻", "总榜 <span class='highlight-gold'>Top 50</span> 获限定尊荣称号徽章"],
+            sLocked: "🔒 尚未取得抽奖资格，快去送礼", sUnlocked: "🎉 恭喜！您已成功获得万钻抽奖资格！",
+            ctaGift: "🎁 立即送礼", ctaSub: "应援心仪女神，赢取丰厚奖励", ctaRank: "主播活动详情 >",
+            lCost: "累计钻石", lRank: "目前排名",
+            fomo: "战况告急！您只差 <span class='highlight-gold'>{diff}</span> 钻就能击败上一名！",
+            bTitle: "荣耀限定徽章", bStack: "🏆 【徽章叠加机制】实力辗压，荣耀全收！",
+            leaderTitle: "白色骑人节送礼榜", hRank: "名次", hTotal: "总钻石",
+            footerTitle: "活动规则与注意事项",
+            footerList: [
+                "仅限送「白色骑人节」系列礼物（含直播间及聊天室），方符合抽奖资格。",
+                "送钻排行榜仅计算对应活动礼物。",
+                "资料每 5 分钟更新一次。",
+                "徽章与奖励将于活动结束后 5 个工作日内发放。",
+                "最终结果以官方计算为准。"
+            ],
+            modal: "您的名次將決定您擁有的徽章版图！第 1 名可獲得全系列徽章，以此類推。"
+        },
+        en: {
+            date: "Mar 14 - 17 White Valentine", title: "Gift & Win 10K", subtitle: "Unlock Goddess's Secret Realm",
+            uD: "D", uH: "H", uM: "M", uS: "S",
+            rules: ["Send <span class='highlight-gold'>White Valentine</span> gifts to qualify", "50 winners get <span class='highlight-gold'>10,000</span> Diamonds", "Top 50 win exclusive honor badges"],
+            sLocked: "🔒 Not qualified. Send gifts now!", sUnlocked: "🎉 Congrats! You've qualified for the draw!",
+            ctaGift: "🎁 Send Gifts", ctaSub: "Support your goddess and win big!", ctaRank: "Streamer Event Details >",
+            lCost: "Diamonds", lRank: "Rank",
+            fomo: "Danger! Only <span class='highlight-gold'>{diff}</span> behind! Gift now!",
+            bTitle: "Honor Badges", bStack: "🏆 [Stacking] Sweeping all badges by ranking higher!",
+            leaderTitle: "White Valentine Gifting Rank", hRank: "Rank", hTotal: "Total Diamonds",
+            footerTitle: "Rules & Notes",
+            footerList: ["Only White Valentine gifts (Live & Chat) qualify for the lucky draw.", "Ranking counts event gifts only.", "Data refreshes every 5 mins.", "Rewards distributed within 5 work days after event.", "Official count is final."],
+            modal: "Rank 1 gets all badges, Rank 2 gets 2nd to 50th, etc. Ultimate glory!"
+        },
+        jp: {
+            date: "3/14 - 3/17 ホワイトバレンタイン", title: "1万ダイヤ抽選", subtitle: "女神の聖域を解禁せよ",
+            uD: "日", uH: "時", uM: "分", uS: "秒",
+            rules: ["<span class='highlight-gold'>「ホワイトバレンタイン」</span>ギフトで抽選資格GET", "抽選で <span class='highlight-gold'>50</span> 名様に <span class='highlight-gold'>10,000</span> ダイヤをプレゼント", "ランキング <span class='highlight-gold'>Top 50</span> に限定称号を贈呈"],
+            sLocked: "🔒 資格なし。ギフトを贈りましょう", sUnlocked: "🎉 おめでとう！抽選資格を獲得しました！",
+            ctaGift: "🎁 ギフトを贈る", ctaSub: "推しの女神を応援して、豪華報酬をゲット！", ctaRank: "ライバー活動詳細 >",
+            lCost: "累計ダイヤ", lRank: "現在順位",
+            fomo: "危機！あと <span class='highlight-gold'>{diff}</span> ダイヤで逆転可能です！",
+            bTitle: "限定バッジ", bStack: "🏆 【バッジ重複】上位者は下位のバッジも全て獲得！",
+            leaderTitle: "ホワイト騎人節ランキング", hRank: "順位", hTotal: "總ダイヤ",
+            footerTitle: "注意事項",
+            footerList: ["限定ギフト（配信＆チャット）のみが対象です。", "ランキングは対象ギフトのみ。 ", "5分ごとにデータ更新。", "終了後5営業日以内に付与。", "最終結果は公式に従います。"],
+            modal: "順位に応じてバッジが解放。1位は全種類獲得可能です。"
+        }
+    };
+
+    let curLang = 'tw';
+    let globalData = null;
+
+    function setLang(lang, btn) {
+        curLang = lang;
+        if(btn) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        renderUI();
+    }
+
+    function renderUI() {
+        const d = LANGS[curLang];
+        document.getElementById('ui-date').innerText = d.date;
+        document.getElementById('ui-title').innerText = d.title;
+        document.getElementById('ui-subtitle').innerText = d.subtitle;
+        document.getElementById('u-d').innerText = d.uD; document.getElementById('u-h').innerText = d.uH;
+        document.getElementById('u-m').innerText = d.uM; document.getElementById('u-s').innerText = d.uS;
+        document.getElementById('ui-rules').innerHTML = d.rules.map(r => `<li>${r}</li>`).join('');
+        document.getElementById('ui-cta-gift').innerText = d.ctaGift;
+        document.getElementById('ui-cta-subtext').innerText = d.ctaSub;
+        document.getElementById('ui-cta-rank').innerText = d.ctaRank;
+        document.getElementById('ui-label-cost').innerText = d.lCost;
+        document.getElementById('ui-label-rank').innerText = d.lRank;
+        document.getElementById('ui-badge-title').innerText = d.bTitle;
+        document.getElementById('ui-badge-stack').innerText = d.bStack;
+        document.getElementById('ui-leader-title').innerText = d.leaderTitle;
+        document.getElementById('ui-footer-title').innerText = d.footerTitle;
+        document.getElementById('ui-footer-list').innerHTML = d.footerList.map(l => `<li>${l}</li>`).join('');
+        document.getElementById('ui-modal-text').innerText = d.modal;
+        if(globalData) processLogic(globalData);
+    }
+
+    async function fetchData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const uid = urlParams.get('user_id') || '61d583fdf6e453715e1ce8fb';
+        const api = `https://valentine2026-api-905468082258.asia-east1.run.app/api/v1/rank?user_id=${uid}`;
+        try {
+            const res = await fetch(api);
+            const data = await res.json();
+            globalData = data;
+            processLogic(data);
+        } catch(e) { console.error("API Error", e); }
+    }
+
+    function processLogic(data) {
+        const user = data.user_info;
+        const list = data.leaderboard || [];
+        const d = LANGS[curLang];
+        
+        if(user) {
+            document.getElementById('user-diamond').innerText = Number(user.diamond_cost).toLocaleString();
+            document.getElementById('user-rank').innerText = user.rank;
+            const sBox = document.getElementById('status-box');
+            const sTxt = document.getElementById('ui-status-text');
+            if(user.diamond_cost >= 1) {
+                sBox.className = "status-box status-unlocked";
+                sTxt.innerText = d.sUnlocked;
+            } else {
+                sBox.className = "status-box status-locked";
+                sTxt.innerText = d.sLocked;
+            }
+            const fomoBox = document.getElementById('fomo-box');
+            if(user.rank > 1 && user.rank <= 10) {
+                const prev = list.find(l => l.rank === user.rank - 1);
+                if(prev) {
+                    const diff = Number(prev.diamond_cost) - Number(user.diamond_cost) + 1;
+                    document.getElementById('ui-fomo-text').innerHTML = d.fomo.replace('{diff}', diff.toLocaleString());
+                    fomoBox.style.display = 'block';
+                }
+            } else { fomoBox.style.display = 'none'; }
+        }
+
+        const table = document.getElementById('leaderboard-table');
+        table.innerHTML = `
+            <thead>
+                <tr style="border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
+                    <th style="text-align: left;">${d.hRank}</th>
+                    <th style="text-align: right;">${d.hTotal}</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${list.map(i => `
+                    <tr>
+                        <td class="rank-num ${i.rank <= 3 ? 'top-'+i.rank : ''}">${i.rank}</td>
+                        <td class="rank-cost">${Number(i.diamond_cost).toLocaleString()}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+
+    function updateTimer() {
+        const end = new Date("2026-03-17T23:59:59+08:00").getTime();
+        const now = new Date().getTime();
+        const diff = end - now;
+        if(diff <= 0) return;
+        document.getElementById('days').innerText = Math.floor(diff / 86400000).toString().padStart(2,'0');
+        document.getElementById('hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2,'0');
+        document.getElementById('mins').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+        document.getElementById('secs').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
+    }
+
+    function toggleModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+
+    function createHeart() {
+        const container = document.getElementById('heart-rain-container');
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤';
+        heart.classList.add('falling-heart');
+        const size = Math.random() * 15 + 10 + 'px'; 
+        heart.style.fontSize = size;
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = Math.random() * 3 + 4 + 's'; 
+        container.appendChild(heart);
+        setTimeout(() => { heart.remove(); }, 7000);
+    }
+    setInterval(createHeart, 400);
+
+    renderUI();
+    fetchData();
+    setInterval(updateTimer, 1000);
+    setInterval(fetchData, 30000);
+</script>
+
+</body>
+</html>
